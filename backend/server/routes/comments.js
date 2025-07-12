@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Comment = require("../models/Comment");
 const Answer = require("../models/Answer");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 const { createNotification, notifyMentions } = require("../utils/notifications");
 
@@ -138,8 +139,47 @@ router.post("/:id/vote", auth, async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    comment.votes += voteType;
+    if (comment.user.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: "Cannot vote on your own comment" });
+    }
+
+    const userId = req.user._id;
+    const hasUpvoted = comment.upvotes.includes(userId);
+    const hasDownvoted = comment.downvotes.includes(userId);
+
+    // Remove existing votes first
+    if (hasUpvoted) {
+      comment.upvotes = comment.upvotes.filter(id => id.toString() !== userId.toString());
+      comment.votes -= 1;
+    }
+    if (hasDownvoted) {
+      comment.downvotes = comment.downvotes.filter(id => id.toString() !== userId.toString());
+      comment.votes += 1;
+    }
+
+    // Add new vote
+    if (voteType === 1) {
+      if (!hasUpvoted) {
+        comment.upvotes.push(userId);
+        comment.votes += 1;
+      }
+    } else if (voteType === -1) {
+      if (!hasDownvoted) {
+        comment.downvotes.push(userId);
+        comment.votes -= 1;
+      }
+    }
+
     await comment.save();
+
+    // Update user's vote tracking
+    await User.findByIdAndUpdate(userId, {
+      $pull: { commentVotes: { comment: comment._id } }
+    });
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { commentVotes: { comment: comment._id, voteType } }
+    });
 
     res.json({ votes: comment.votes });
   } catch (error) {

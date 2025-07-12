@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { postQuestion } from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
 import TagInput from '../components/TagInput';
+import { Home, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AskQuestion = () => {
@@ -56,21 +57,39 @@ const AskQuestion = () => {
       <div className="layout-container flex h-full grow flex-col">
         <div className="px-40 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+            {/* Breadcrumbs */}
+            <nav className="flex items-center space-x-2 text-sm mb-6">
+              <Link to="/" className="flex items-center text-[#cba990] hover:text-white transition-colors">
+                <Home className="w-4 h-4 mr-1" />
+                Home
+              </Link>
+              <ChevronRight className="w-4 h-4 text-[#cba990]" />
+              <Link to="/" className="text-[#cba990] hover:text-white transition-colors">
+                Questions
+              </Link>
+              <ChevronRight className="w-4 h-4 text-[#cba990]" />
+              <span className="text-white">Ask Question</span>
+            </nav>
+
             <div className="flex flex-wrap justify-between gap-3 p-4">
               <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
                 Ask a public question
               </p>
             </div>
             
-            <p className="text-white text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-white text-base font-normal leading-normal pb-3 pt-1 px-4 text-left">
               Share your knowledge and help others learn
+            </p>
+
+            <p className="text-white text-left text-base font-normal leading-relaxed px-4 pb-4">
+              Asking a great question helps you get great answers faster. Provide context, share what you've tried, and be as clear as possible — your future self and others will thank you!
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Title */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Title *</p>
+                  <p className="text-white text-base font-medium leading-normal pb-2 text-left">Title *</p>
                   <input
                     type="text"
                     value={title}
@@ -79,7 +98,7 @@ const AskQuestion = () => {
                     className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border-none bg-[#493222] focus:border-none h-14 placeholder:text-[#cba990] p-4 text-base font-normal leading-normal"
                     maxLength={300}
                   />
-                  <p className="text-[#cba990] text-sm mt-1">
+                  <p className="text-[#cba990] text-sm mt-1 text-left">
                     {title.length}/300 characters
                   </p>
                 </label>
@@ -88,7 +107,7 @@ const AskQuestion = () => {
               {/* Description */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Description *</p>
+                  <p className="text-white text-base font-medium leading-normal pb-2 text-left">Description *</p>
                   <div className="bg-[#493222] rounded-xl overflow-hidden">
                     <RichTextEditor
                       value={description}
@@ -102,7 +121,7 @@ const AskQuestion = () => {
               {/* Tags */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Tags *</p>
+                  <p className="text-white text-base font-medium leading-normal pb-2 text-left">Tags *</p>
                   <div className="bg-[#493222] rounded-xl p-4">
                     <TagInput
                       tags={tags}
@@ -110,7 +129,7 @@ const AskQuestion = () => {
                       placeholder="Add tags like 'react', 'javascript', 'nodejs'..."
                     />
                   </div>
-                  <p className="text-[#cba990] text-sm mt-1">
+                  <p className="text-[#cba990] text-sm mt-1 text-left">
                     Add up to 5 tags to help others find your question
                   </p>
                 </label>

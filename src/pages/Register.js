@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../services/api';
+import { register as registerApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -12,6 +13,7 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -40,16 +42,16 @@ const Register = () => {
 
     try {
       setLoading(true);
-      const response = await register({
+      const response = await registerApi({
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
       
-      // Store token and user data
+      // Store token and user data using AuthContext
       localStorage.setItem('token', response.data.token);
       if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        login(response.data.user);
       }
       
       toast.success('Account created successfully!');

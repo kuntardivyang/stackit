@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/api';
+import { login as loginApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -28,12 +30,12 @@ const Login = () => {
 
     try {
       setLoading(true);
-      const response = await login(formData);
+      const response = await loginApi(formData);
       
-      // Store token and user data
+      // Store token and user data using AuthContext
       localStorage.setItem('token', response.data.token);
       if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        login(response.data.user);
       }
       
       toast.success('Logged in successfully!');

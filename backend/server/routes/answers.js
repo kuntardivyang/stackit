@@ -1,6 +1,7 @@
 const express = require("express");
 const Answer = require("../models/Answer");
 const Question = require("../models/Question");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 const { notifyNewAnswer, notifyAnswerAccepted, notifyMentions } = require("../utils/notifications");
 
@@ -12,6 +13,31 @@ router.get("/question/:questionId", async (req, res) => {
     const answers = await Answer.find({ question: req.params.questionId })
       .populate("user", "username")
       .sort({ votes: -1, createdAt: -1 });
+    
+    // If user is authenticated, add their vote status
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (token) {
+      try {
+        const jwt = require("jsonwebtoken");
+        const JWT_SECRET = "stackit_secret";
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        
+        if (user) {
+          answers.forEach(answer => {
+            answer.userVote = null;
+            if (answer.upvotes.includes(user._id)) {
+              answer.userVote = 'up';
+            } else if (answer.downvotes.includes(user._id)) {
+              answer.userVote = 'down';
+            }
+          });
+        }
+      } catch (error) {
+        // Token invalid, continue without user vote info
+      }
+    }
+    
     res.json(answers);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -111,20 +137,56 @@ router.delete("/:id", auth, async (req, res) => {
 router.post("/:id/vote", auth, async (req, res) => {
   try {
     const { voteType } = req.body; // 'up' or 'down'
+    
+    if (!['up', 'down'].includes(voteType)) {
+      return res.status(400).json({ error: "Invalid vote type. Must be 'up' or 'down'" });
+    }
+    
     const answer = await Answer.findById(req.params.id);
     if (!answer) return res.status(404).json({ error: "Answer not found" });
     
-    if (answer.user.toString() === req.user.id) {
+    if (answer.user.toString() === req.user._id.toString()) {
       return res.status(400).json({ error: "Cannot vote on your own answer" });
     }
     
-    if (voteType === 'up') {
-      answer.votes += 1;
-    } else if (voteType === 'down') {
+    const userId = req.user._id;
+    const hasUpvoted = answer.upvotes.includes(userId);
+    const hasDownvoted = answer.downvotes.includes(userId);
+    
+    // Remove existing votes first
+    if (hasUpvoted) {
+      answer.upvotes = answer.upvotes.filter(id => id.toString() !== userId.toString());
       answer.votes -= 1;
+    }
+    if (hasDownvoted) {
+      answer.downvotes = answer.downvotes.filter(id => id.toString() !== userId.toString());
+      answer.votes += 1;
+    }
+    
+    // Add new vote
+    if (voteType === 'up') {
+      if (!hasUpvoted) {
+        answer.upvotes.push(userId);
+        answer.votes += 1;
+      }
+    } else if (voteType === 'down') {
+      if (!hasDownvoted) {
+        answer.downvotes.push(userId);
+        answer.votes -= 1;
+      }
     }
     
     await answer.save();
+    
+    // Update user's vote tracking
+    await User.findByIdAndUpdate(userId, {
+      $pull: { answerVotes: { answer: answer._id } }
+    });
+    
+    await User.findByIdAndUpdate(userId, {
+      $push: { answerVotes: { answer: answer._id, voteType } }
+    });
+    
     res.json(answer);
   } catch (error) {
     res.status(500).json({ error: error.message });

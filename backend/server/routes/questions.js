@@ -17,6 +17,40 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get all tags with statistics
+router.get("/tags/all", async (req, res) => {
+  try {
+    const questions = await Question.find({}, 'tags createdAt');
+    
+    // Count tag usage
+    const tagStats = {};
+    questions.forEach(question => {
+      question.tags.forEach(tag => {
+        if (!tagStats[tag]) {
+          tagStats[tag] = {
+            name: tag,
+            count: 0,
+            questions: [],
+            lastUsed: null
+          };
+        }
+        tagStats[tag].count++;
+        tagStats[tag].questions.push(question._id);
+        if (!tagStats[tag].lastUsed || question.createdAt > tagStats[tag].lastUsed) {
+          tagStats[tag].lastUsed = question.createdAt;
+        }
+      });
+    });
+
+    // Convert to array and sort by count (descending)
+    const tagsArray = Object.values(tagStats).sort((a, b) => b.count - a.count);
+    
+    res.json(tagsArray);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get single question
 router.get("/:id", async (req, res) => {
   try {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { MessageSquare, Clock, User, Tag, ThumbsUp, ThumbsDown, CheckCircle, Trash2, Edit } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { MessageSquare, Clock, User, Tag, ThumbsUp, ThumbsDown, CheckCircle, Trash2, Edit, ChevronRight, Home } from 'lucide-react';
 import { fetchQuestion, postAnswer, voteAnswer, acceptAnswer, deleteQuestion, deleteAnswer } from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
 import CommentSection from '../components/CommentSection';
+import QuickAuthModal from '../components/QuickAuthModal';
 import toast from 'react-hot-toast';
 
 const QuestionDetail = () => {
@@ -17,6 +18,8 @@ const QuestionDetail = () => {
   const [user, setUser] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAnswer, setDeletingAnswer] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingVote, setPendingVote] = useState(null);
 
   useEffect(() => {
     loadQuestion();
@@ -74,7 +77,8 @@ const QuestionDetail = () => {
 
   const handleVote = async (answerId, voteType) => {
     if (!user) {
-      toast.error('Please log in to vote');
+      setPendingVote({ answerId, voteType });
+      setShowAuthModal(true);
       return;
     }
 
@@ -85,6 +89,19 @@ const QuestionDetail = () => {
       toast.success('Vote recorded!');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to vote');
+    }
+  };
+
+  const handleAuthSuccess = async () => {
+    if (pendingVote) {
+      try {
+        await voteAnswer(pendingVote.answerId, pendingVote.voteType);
+        loadQuestion();
+        toast.success('Vote recorded!');
+      } catch (error) {
+        toast.error(error.response?.data?.error || 'Failed to vote');
+      }
+      setPendingVote(null);
     }
   };
 
@@ -220,6 +237,22 @@ const QuestionDetail = () => {
       <div className="layout-container flex h-full grow flex-col">
         <div className="px-40 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+            {/* Breadcrumbs */}
+            <nav className="flex items-center space-x-2 text-sm mb-6">
+              <Link to="/" className="flex items-center text-[#cba990] hover:text-white transition-colors">
+                <Home className="w-4 h-4 mr-1" />
+                Home
+              </Link>
+              <ChevronRight className="w-4 h-4 text-[#cba990]" />
+              <Link to="/" className="text-[#cba990] hover:text-white transition-colors">
+                Questions
+              </Link>
+              <ChevronRight className="w-4 h-4 text-[#cba990]" />
+              <span className="text-white truncate max-w-xs" title={question.title}>
+                {question.title}
+              </span>
+            </nav>
+
             {/* Question */}
             <div className="mb-8">
               <div className="flex justify-between items-start mb-4">
@@ -297,31 +330,41 @@ const QuestionDetail = () => {
                         </div>
                       </div>
                       
-                      {/* Voting */}
-                      <div className="flex flex-wrap gap-4 px-4 py-2">
-                        <div className="flex items-center justify-center gap-2 px-3 py-2">
+                      {/* Voting - Stack Overflow Style */}
+                      <div className="flex items-start gap-4 px-4 py-2">
+                        <div className="flex flex-col items-center">
                           <button
                             onClick={() => handleVote(answer._id, 'up')}
-                            className="text-[#cba990] hover:text-[#f26c0c] transition-colors"
-                            disabled={!user}
+                            className={`p-1 rounded transition-colors ${
+                              answer.userVote === 'up' 
+                                ? 'text-[#f26c0c] bg-[#493222]' 
+                                : 'text-[#cba990] hover:text-[#f26c0c] hover:bg-[#493222]'
+                            }`}
+                            title={!user ? 'Click to login and vote' : 'Upvote'}
                           >
-                            <ThumbsUp className="w-6 h-6" />
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+                            </svg>
                           </button>
-                          <p className="text-[#cba990] text-[13px] font-bold leading-normal tracking-[0.015em]">
+                          <span className={`text-sm font-bold py-1 ${
+                            answer.votes > 0 ? 'text-[#f26c0c]' : 
+                            answer.votes < 0 ? 'text-red-400' : 'text-[#cba990]'
+                          }`}>
                             {answer.votes || 0}
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-center gap-2 px-3 py-2">
+                          </span>
                           <button
                             onClick={() => handleVote(answer._id, 'down')}
-                            className="text-[#cba990] hover:text-[#f26c0c] transition-colors"
-                            disabled={!user}
+                            className={`p-1 rounded transition-colors ${
+                              answer.userVote === 'down' 
+                                ? 'text-red-400 bg-[#493222]' 
+                                : 'text-[#cba990] hover:text-red-400 hover:bg-[#493222]'
+                            }`}
+                            title={!user ? 'Click to login and vote' : 'Downvote'}
                           >
-                            <ThumbsDown className="w-6 h-6" />
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 20l-8-8h6V4h4v8h6z"/>
+                            </svg>
                           </button>
-                          <p className="text-[#cba990] text-[13px] font-bold leading-normal tracking-[0.015em]">
-                            {Math.abs(Math.min(answer.votes || 0, 0))}
-                          </p>
                         </div>
                         
                         {/* Accept Answer Button */}
@@ -441,6 +484,16 @@ const QuestionDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Quick Auth Modal */}
+      <QuickAuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setPendingVote(null);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };

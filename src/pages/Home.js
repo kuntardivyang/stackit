@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { MessageSquare, Eye, Clock, User, Tag, Trash2, Edit } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { MessageSquare, Eye, Clock, User, Tag, Trash2, Edit, Home as HomeIcon } from 'lucide-react';
 import { fetchQuestions, deleteQuestion } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ const Home = () => {
   const [filterTag, setFilterTag] = useState('');
   const [user, setUser] = useState(null);
   const [deletingQuestion, setDeletingQuestion] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     loadQuestions();
@@ -24,6 +25,13 @@ const Home = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const tagFromUrl = searchParams.get('tag');
+    if (tagFromUrl) {
+      setFilterTag(tagFromUrl);
+    }
+  }, [searchParams]);
 
   const loadQuestions = async () => {
     try {
@@ -118,6 +126,15 @@ const Home = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center space-x-2 text-sm mb-6">
+        <Link to="/" className="flex items-center text-[#cba990] hover:text-white transition-colors">
+          <HomeIcon className="w-4 h-4 mr-1" />
+          Home
+        </Link>
+        <span className="text-white">/ Questions</span>
+      </nav>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

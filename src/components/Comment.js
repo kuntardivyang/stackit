@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { updateComment, deleteComment, voteComment } from '../services/api';
+import QuickAuthModal from './QuickAuthModal';
 
 // Utility to highlight @mentions
 function highlightMentions(text) {
@@ -17,6 +18,8 @@ const Comment = ({ comment, onUpdate, onDelete, currentUser }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingVote, setPendingVote] = useState(null);
 
   const handleEdit = async () => {
     if (editContent.trim() === '') return;
@@ -44,11 +47,35 @@ const Comment = ({ comment, onUpdate, onDelete, currentUser }) => {
   };
 
   const handleVote = async (voteType) => {
+    if (!currentUser) {
+      setPendingVote(voteType);
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       const response = await voteComment(comment._id, voteType);
       onUpdate({ ...comment, votes: response.data.votes });
     } catch (error) {
       console.error('Error voting on comment:', error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      }
+    }
+  };
+
+  const handleAuthSuccess = async () => {
+    if (pendingVote) {
+      try {
+        const response = await voteComment(comment._id, pendingVote);
+        onUpdate({ ...comment, votes: response.data.votes });
+      } catch (error) {
+        console.error('Error voting on comment:', error);
+        if (error.response?.data?.message) {
+          alert(error.response.data.message);
+        }
+      }
+      setPendingVote(null);
     }
   };
 
@@ -96,16 +123,24 @@ const Comment = ({ comment, onUpdate, onDelete, currentUser }) => {
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => handleVote(1)}
-                      className="hover:text-green-400 transition-colors"
+                      className="hover:text-green-400 transition-colors p-1 rounded"
+                      title="Upvote"
                     >
-                      ▲
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+                      </svg>
                     </button>
-                    <span className="text-white">{comment.votes}</span>
+                    <span className={`text-white ${comment.votes > 0 ? 'text-green-400' : comment.votes < 0 ? 'text-red-400' : ''}`}>
+                      {comment.votes}
+                    </span>
                     <button
                       onClick={() => handleVote(-1)}
-                      className="hover:text-red-400 transition-colors"
+                      className="hover:text-red-400 transition-colors p-1 rounded"
+                      title="Downvote"
                     >
-                      ▼
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 20l-8-8h6V4h4v8h6z"/>
+                      </svg>
                     </button>
                   </div>
                   <span>by {comment.user.username}</span>
@@ -140,6 +175,16 @@ const Comment = ({ comment, onUpdate, onDelete, currentUser }) => {
           )}
         </div>
       </div>
+
+      {/* Quick Auth Modal */}
+      <QuickAuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setPendingVote(null);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };

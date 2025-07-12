@@ -26,6 +26,9 @@ const CommentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // Track individual votes for better vote management
+  upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   createdAt: {
     type: Date,
     default: Date.now

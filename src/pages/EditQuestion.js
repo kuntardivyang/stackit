@@ -68,7 +68,7 @@ const EditQuestion = () => {
         <div className="px-40 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
             <div className="flex flex-wrap justify-between gap-3 p-4">
-              <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
+              <p className="text-white text-left tracking-light text-[32px] font-bold leading-tight min-w-72">
                 Edit Question
               </p>
             </div>
@@ -76,7 +76,7 @@ const EditQuestion = () => {
               {/* Title */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Title *</p>
+                  <p className="text-white text-left text-base font-medium leading-normal pb-2">Title *</p>
                   <input
                     type="text"
                     value={title}
@@ -85,7 +85,7 @@ const EditQuestion = () => {
                     className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border-none bg-[#493222] focus:border-none h-14 placeholder:text-[#cba990] p-4 text-base font-normal leading-normal"
                     maxLength={300}
                   />
-                  <p className="text-[#cba990] text-sm mt-1">
+                  <p className="text-[#cba990] text-sm mt-1 text-left">
                     {title.length}/300 characters
                   </p>
                 </label>
@@ -93,7 +93,7 @@ const EditQuestion = () => {
               {/* Description */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Description *</p>
+                  <p className="text-white text-base font-medium leading-normal pb-2 text-left">Description *</p>
                   <div className="bg-[#493222] rounded-xl overflow-hidden">
                     <RichTextEditor
                       value={description}
@@ -106,7 +106,7 @@ const EditQuestion = () => {
               {/* Tags */}
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-white text-base font-medium leading-normal pb-2">Tags *</p>
+                  <p className="text-white text-base font-medium leading-normal pb-2 text-left">Tags *</p>
                   <div className="bg-[#493222] rounded-xl p-4">
                     <TagInput
                       tags={tags}
@@ -114,7 +114,7 @@ const EditQuestion = () => {
                       placeholder="Edit tags like 'react', 'javascript', 'nodejs'..."
                     />
                   </div>
-                  <p className="text-[#cba990] text-sm mt-1">
+                  <p className="text-[#cba990] text-sm mt-1 text-left">
                     Add up to 5 tags to help others find your question
                   </p>
                 </label>

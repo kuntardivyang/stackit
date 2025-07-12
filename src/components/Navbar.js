@@ -4,26 +4,16 @@ import { Bell } from 'lucide-react';
 import { fetchUnreadCount } from '../services/api';
 import toast from 'react-hot-toast';
 import NotificationDropdown from './NotificationDropdown';
+import { FaUserCircle } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData && userData !== 'undefined') {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (user) {
@@ -44,9 +34,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+    logout();
     toast.success('Logged out successfully');
     navigate('/');
   };
@@ -185,16 +173,12 @@ const Navbar = () => {
           <div className="flex gap-4">
             <Link
               to="/login"
-              className="text-white text-sm font-medium leading-normal hover:text-[#cba990] no-underline"
+              className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-10 px-4 bg-[#f26c0c] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#e55a00] no-underline"
             >
-              Login
+              <FaUserCircle className="w-5 h-5" />
+              <span className="truncate">Login</span>
             </Link>
-            <Link
-              to="/register"
-              className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#f26c0c] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#e55a00] no-underline"
-            >
-              <span className="truncate">Sign Up</span>
-            </Link>
+
           </div>
         )}
       </div>

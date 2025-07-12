@@ -27,6 +27,7 @@ export const fetchQuestion = (id) => api.get(`/questions/${id}`);
 export const postQuestion = (questionData) => api.post('/questions', questionData);
 export const updateQuestion = (id, questionData) => api.put(`/questions/${id}`, questionData);
 export const deleteQuestion = (id) => api.delete(`/questions/${id}`);
+export const fetchAllTags = () => api.get('/questions/tags/all');
 
 // Answers API
 export const fetchAnswers = (questionId) => api.get(`/answers/question/${questionId}`);
