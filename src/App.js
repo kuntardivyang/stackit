@@ -12,9 +12,9 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="App bg-[#2a1a0f] min-h-screen">
         <Navbar />
-        <main className="min-h-screen bg-gray-50">
+        <main className="min-h-screen bg-[#2a1a0f]">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

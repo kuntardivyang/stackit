@@ -96,7 +96,7 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="border-b border-gray-200 py-6">
+            <div key={i} className="border-b border-[#493222] py-6">
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
               <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
               <div className="flex space-x-4">
@@ -116,8 +116,8 @@ const Home = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">All Questions</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-white">All Questions</h1>
+          <p className="text-white mt-2">
             {filteredAndSortedQuestions.length} questions
           </p>
         </div>
@@ -132,11 +132,11 @@ const Home = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
         <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+          <label className="text-sm font-medium text-white">Sort by:</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-[#493222] bg-[#493222] text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#cba990]"
           >
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
@@ -146,13 +146,13 @@ const Home = () => {
         </div>
 
         <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700">Filter by tag:</label>
+          <label className="text-sm font-medium text-white">Filter by tag:</label>
           <input
             type="text"
             value={filterTag}
             onChange={(e) => setFilterTag(e.target.value)}
             placeholder="Enter tag name..."
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-[#493222] bg-[#493222] text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#cba990]"
           />
         </div>
       </div>
@@ -160,18 +160,18 @@ const Home = () => {
       {/* Questions List */}
       <div className="space-y-6">
         {filteredAndSortedQuestions.map((question) => (
-          <div key={question._id} className="border-b border-gray-200 pb-6">
+          <div key={question._id} className="border-b border-[#493222] pb-6">
             <div className="flex items-start space-x-4">
               {/* Stats */}
               <div className="flex flex-col items-center space-y-1 min-w-[80px]">
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-lg font-semibold text-white">
                   {question.answers?.length || 0}
                 </div>
-                <div className="text-xs text-gray-500">answers</div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-xs text-white">answers</div>
+                <div className="text-lg font-semibold text-white">
                   {question.views || 0}
                 </div>
-                <div className="text-xs text-gray-500">views</div>
+                <div className="text-xs text-white">views</div>
               </div>
 
               {/* Question Content */}
@@ -179,7 +179,7 @@ const Home = () => {
                 <div className="flex justify-between items-start mb-2">
                   <Link
                     to={`/question/${question._id}`}
-                    className="text-xl font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-xl font-semibold text-white hover:text-[#cba990] transition-colors"
                   >
                     {question.title}
                   </Link>
@@ -189,7 +189,7 @@ const Home = () => {
                     <div className="flex space-x-2 ml-4">
                       <Link
                         to={`/edit-question/${question._id}`}
-                        className="p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-1 text-white hover:text-[#cba990] hover:bg-[#493222] rounded transition-colors"
                         title="Edit question"
                       >
                         <Edit className="w-4 h-4" />
@@ -197,7 +197,7 @@ const Home = () => {
                       <button
                         onClick={() => handleDeleteQuestion(question._id)}
                         disabled={deletingQuestion === question._id}
-                        className="p-1 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-white hover:text-red-400 hover:bg-[#493222] rounded transition-colors"
                         title="Delete question"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -207,7 +207,7 @@ const Home = () => {
                 </div>
                 
                 <div 
-                  className="mt-2 text-gray-600 line-clamp-2"
+                  className="mt-2 text-white line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: question.description }}
                 />
 
@@ -226,7 +226,7 @@ const Home = () => {
                 </div>
 
                 {/* Meta Info */}
-                <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
+                <div className="flex items-center space-x-4 mt-3 text-sm text-white">
                   <div className="flex items-center space-x-1">
                     <User className="w-4 h-4" />
                     <span>{question.user?.username || 'Anonymous'}</span>
@@ -248,11 +248,11 @@ const Home = () => {
 
       {filteredAndSortedQuestions.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No questions found.</p>
+          <p className="text-white text-lg">No questions found.</p>
           {filterTag && (
             <button
               onClick={() => setFilterTag('')}
-              className="mt-2 text-blue-600 hover:text-blue-800"
+              className="mt-2 text-[#cba990] hover:text-white"
             >
               Clear filter
             </button>
