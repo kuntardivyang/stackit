@@ -32,7 +32,7 @@ router.post("/", auth, async (req, res) => {
 
     const comment = new Comment({
       content,
-      user: req.user.id,
+      user: req.user._id,
       answer: answerId,
       question: questionId
     });
@@ -44,10 +44,10 @@ router.post("/", auth, async (req, res) => {
 
     // Create notification for answer author
     const answer = await Answer.findById(answerId).populate("user");
-    if (answer && answer.user._id.toString() !== req.user.id) {
+    if (answer && answer.user._id.toString() !== req.user._id.toString()) {
       await createNotification(
         answer.user._id,
-        req.user.id,
+        req.user._id,
         "comment",
         `${req.user.username} commented on your answer`,
         `/question/${questionId}`,
@@ -57,7 +57,7 @@ router.post("/", auth, async (req, res) => {
     }
 
     // Notify mentioned users in the comment
-    await notifyMentions(content, req.user.id, questionId, answerId);
+    await notifyMentions(content, req.user._id, questionId, answerId);
 
     res.status(201).json(comment);
   } catch (error) {
@@ -85,7 +85,7 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.user.toString() !== req.user.id) {
+    if (comment.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized to edit this comment" });
     }
 
@@ -111,7 +111,7 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.user.toString() !== req.user.id) {
+    if (comment.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized to delete this comment" });
     }
 

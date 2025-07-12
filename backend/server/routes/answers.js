@@ -27,7 +27,7 @@ router.post("/:questionId", auth, async (req, res) => {
 
     const answer = await Answer.create({
       content,
-      user: req.user.id,
+      user: req.user._id,
       question: req.params.questionId
     });
 
@@ -39,10 +39,10 @@ router.post("/:questionId", auth, async (req, res) => {
       .populate("user", "username");
 
     // Create notification for question owner
-    if (question.user && question.user._id.toString() !== req.user.id) {
+    if (question.user && question.user._id.toString() !== req.user._id.toString()) {
       await notifyNewAnswer(
         question.user._id,
-        req.user.id,
+        req.user._id,
         question._id,
         answer._id,
         question.title
@@ -50,7 +50,7 @@ router.post("/:questionId", auth, async (req, res) => {
     }
 
     // Check for mentions in the answer content
-    await notifyMentions(content, req.user.id, question._id, answer._id);
+    await notifyMentions(content, req.user._id, question._id, answer._id);
 
     res.status(201).json(populatedAnswer);
   } catch (error) {
@@ -64,7 +64,7 @@ router.put("/:id", auth, async (req, res) => {
     const answer = await Answer.findById(req.params.id);
     if (!answer) return res.status(404).json({ error: "Answer not found" });
     
-    if (answer.user.toString() !== req.user.id) {
+    if (answer.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ error: "Not authorized" });
     }
     
@@ -76,7 +76,7 @@ router.put("/:id", auth, async (req, res) => {
     
     // Check for mentions in updated content
     if (req.body.content) {
-      await notifyMentions(req.body.content, req.user.id, answer.question, answer._id);
+      await notifyMentions(req.body.content, req.user._id, answer.question, answer._id);
     }
     
     res.json(updatedAnswer);
@@ -91,7 +91,7 @@ router.delete("/:id", auth, async (req, res) => {
     const answer = await Answer.findById(req.params.id);
     if (!answer) return res.status(404).json({ error: "Answer not found" });
     
-    if (answer.user.toString() !== req.user.id) {
+    if (answer.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ error: "Not authorized" });
     }
     
