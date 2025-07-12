@@ -1,6 +1,7 @@
 const express = require("express");
 const Question = require("../models/Question");
 const auth = require("../middleware/auth");
+const { notifyMentions } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -42,6 +43,10 @@ router.post("/", auth, async (req, res) => {
       tags,
       user: req.user.id
     });
+
+    // Check for mentions in the question description
+    await notifyMentions(description, req.user.id, question._id);
+
     res.status(201).json(question);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -63,6 +68,12 @@ router.put("/:id", auth, async (req, res) => {
       req.body,
       { new: true }
     );
+
+    // Check for mentions in updated description
+    if (req.body.description) {
+      await notifyMentions(req.body.description, req.user.id, question._id);
+    }
+
     res.json(updatedQuestion);
   } catch (error) {
     res.status(500).json({ error: error.message });

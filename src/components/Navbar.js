@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Bell } from 'lucide-react';
+import { fetchUnreadCount } from '../services/api';
 import toast from 'react-hot-toast';
+import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +25,24 @@ const Navbar = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      loadUnreadCount();
+      // Set up interval to check for new notifications every 30 seconds
+      const interval = setInterval(loadUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadUnreadCount = async () => {
+    try {
+      const response = await fetchUnreadCount();
+      setUnreadCount(response.data.count);
+    } catch (error) {
+      console.error('Error loading unread count:', error);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -32,6 +55,13 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      loadUnreadCount(); // Refresh count when opening
     }
   };
 
@@ -99,6 +129,27 @@ const Navbar = () => {
             >
               <span className="truncate">Ask Question</span>
             </Link>
+
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={handleNotificationClick}
+                className="relative p-2 text-white hover:text-[#cba990] transition-colors"
+              >
+                <Bell className="w-6 h-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#f26c0c] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              <NotificationDropdown 
+                isOpen={showNotifications} 
+                onClose={() => setShowNotifications(false)}
+              />
+            </div>
+
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}

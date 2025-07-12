@@ -212,7 +212,7 @@ const Home = () => {
                 </div>
                 
                 <div 
-                  className="mt-2 text-white line-clamp-2"
+                  className="mt-2 text-white text-left line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: question.description }}
                 />
 

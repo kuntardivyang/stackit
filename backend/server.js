@@ -21,6 +21,8 @@ mongoose.connect("mongodb://localhost:27017/stackit")
 app.use("/api/auth", require("./server/routes/auth"));
 app.use("/api/questions", require("./server/routes/questions"));
 app.use("/api/answers", require("./server/routes/answers"));
+app.use("/api/notifications", require("./server/routes/notifications"));
+app.use("/api/comments", require("./server/routes/comments"));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

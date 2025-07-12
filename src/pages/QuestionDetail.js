@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MessageSquare, Clock, User, Tag, ThumbsUp, ThumbsDown, CheckCircle, Trash2, Edit } from 'lucide-react';
 import { fetchQuestion, postAnswer, voteAnswer, acceptAnswer, deleteQuestion, deleteAnswer } from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
+import CommentSection from '../components/CommentSection';
 import toast from 'react-hot-toast';
 
 const QuestionDetail = () => {
@@ -88,7 +89,7 @@ const QuestionDetail = () => {
   };
 
   const handleAcceptAnswer = async (answerId) => {
-    if (!user || question.user._id !== user._id) {
+    if (!user || !question.user || question.user._id !== user._id) {
       toast.error('Only the question owner can accept answers');
       return;
     }
@@ -103,7 +104,7 @@ const QuestionDetail = () => {
   };
 
   const handleDeleteQuestion = async () => {
-    if (!user || question.user._id !== user._id) {
+    if (!user || !question.user || question.user._id !== user._id) {
       toast.error('Only the question owner can delete it');
       return;
     }
@@ -126,7 +127,7 @@ const QuestionDetail = () => {
     }
 
     const answer = answers.find(a => a._id === answerId);
-    if (!answer || answer.user._id !== user._id) {
+    if (!answer || !answer.user || answer.user._id !== user._id) {
       toast.error('Only the answer author can delete it');
       return;
     }
@@ -227,7 +228,7 @@ const QuestionDetail = () => {
                 </h1>
                 
                 {/* Question Actions */}
-                {user && question.user._id === user._id && (
+                {user && question.user && question.user._id === user._id && (
                   <div className="flex space-x-2">
                     <button
                       onClick={() => navigate(`/edit-question/${id}`)}
@@ -260,7 +261,7 @@ const QuestionDetail = () => {
                 ))}
               </div>
 
-              <p className="text-white text-base font-normal leading-normal pb-3 pt-1 px-4">
+              <p className="text-white text-base text-left font-normal leading-normal pb-3 pt-1 px-4">
                 {question.description.replace(/<[^>]*>/g, '')}
               </p>
             </div>
@@ -324,7 +325,7 @@ const QuestionDetail = () => {
                         </div>
                         
                         {/* Accept Answer Button */}
-                        {user && question.user._id === user._id && !answer.isAccepted && (
+                        {user && question.user && question.user._id === user._id && !answer.isAccepted && (
                           <button
                             onClick={() => handleAcceptAnswer(answer._id)}
                             className="text-[#f26c0c] hover:text-white text-sm font-medium px-3 py-2 rounded-full hover:bg-[#493222] transition-colors"
@@ -334,7 +335,7 @@ const QuestionDetail = () => {
                         )}
 
                         {/* Delete Answer Button */}
-                        {user && answer.user._id === user._id && (
+                        {user && answer.user && answer.user._id === user._id && (
                           <button
                             onClick={() => handleDeleteAnswer(answer._id)}
                             disabled={deletingAnswer === answer._id}
@@ -344,6 +345,15 @@ const QuestionDetail = () => {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
+                      </div>
+                      
+                      {/* Comments Section */}
+                      <div className="px-4">
+                        <CommentSection
+                          answerId={answer._id}
+                          questionId={id}
+                          currentUser={user}
+                        />
                       </div>
                     </div>
                   ))}

@@ -2,6 +2,7 @@ const express = require("express");
 const Answer = require("../models/Answer");
 const Question = require("../models/Question");
 const auth = require("../middleware/auth");
+const { notifyNewAnswer, notifyAnswerAccepted, notifyMentions } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get("/question/:questionId", async (req, res) => {
 router.post("/:questionId", auth, async (req, res) => {
   try {
     const { content } = req.body;
-    const question = await Question.findById(req.params.questionId);
+    const question = await Question.findById(req.params.questionId).populate("user", "username");
     if (!question) return res.status(404).json({ error: "Question not found" });
 
     const answer = await Answer.create({
@@ -36,6 +37,20 @@ router.post("/:questionId", auth, async (req, res) => {
 
     const populatedAnswer = await Answer.findById(answer._id)
       .populate("user", "username");
+
+    // Create notification for question owner
+    if (question.user && question.user._id.toString() !== req.user.id) {
+      await notifyNewAnswer(
+        question.user._id,
+        req.user.id,
+        question._id,
+        answer._id,
+        question.title
+      );
+    }
+
+    // Check for mentions in the answer content
+    await notifyMentions(content, req.user.id, question._id, answer._id);
 
     res.status(201).json(populatedAnswer);
   } catch (error) {
@@ -58,6 +73,11 @@ router.put("/:id", auth, async (req, res) => {
       req.body,
       { new: true }
     ).populate("user", "username");
+    
+    // Check for mentions in updated content
+    if (req.body.content) {
+      await notifyMentions(req.body.content, req.user.id, answer.question, answer._id);
+    }
     
     res.json(updatedAnswer);
   } catch (error) {
@@ -114,10 +134,10 @@ router.post("/:id/vote", auth, async (req, res) => {
 // Accept answer (protected route - only question owner)
 router.post("/:id/accept", auth, async (req, res) => {
   try {
-    const answer = await Answer.findById(req.params.id);
+    const answer = await Answer.findById(req.params.id).populate("user", "username");
     if (!answer) return res.status(404).json({ error: "Answer not found" });
     
-    const question = await Question.findById(answer.question);
+    const question = await Question.findById(answer.question).populate("user", "username");
     if (!question) return res.status(404).json({ error: "Question not found" });
     
     if (question.user.toString() !== req.user.id) {
@@ -133,6 +153,17 @@ router.post("/:id/accept", auth, async (req, res) => {
     // Accept this answer
     answer.isAccepted = true;
     await answer.save();
+    
+    // Create notification for answer author
+    if (answer.user && answer.user._id.toString() !== req.user.id) {
+      await notifyAnswerAccepted(
+        answer.user._id,
+        req.user.id,
+        question._id,
+        answer._id,
+        question.title
+      );
+    }
     
     res.json(answer);
   } catch (error) {

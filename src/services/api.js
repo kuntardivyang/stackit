@@ -1,37 +1,53 @@
 // /services/api.js
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:5000/api' });
+const API_BASE_URL = 'http://localhost:5000/api';
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
+// Create axios instance with auth header
+const api = axios.create({
+  baseURL: API_BASE_URL,
 });
 
-// Auth endpoints
-export const login = (data) => API.post('/auth/login', data);
-export const register = (data) => API.post('/auth/register', data);
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-// Question endpoints
-export const fetchQuestions = () => API.get('/questions');
-export const fetchQuestion = (id) => API.get(`/questions/${id}`);
-export const postQuestion = (data) => API.post('/questions', data);
-export const updateQuestion = (id, data) => API.put(`/questions/${id}`, data);
-export const deleteQuestion = (id) => API.delete(`/questions/${id}`);
+// Auth API
+export const register = (userData) => api.post('/auth/register', userData);
+export const login = (userData) => api.post('/auth/login', userData);
 
-// Answer endpoints
-export const fetchAnswers = (questionId) => API.get(`/answers/question/${questionId}`);
-export const postAnswer = (questionId, data) => API.post(`/answers/${questionId}`, data);
-export const updateAnswer = (id, data) => API.put(`/answers/${id}`, data);
-export const deleteAnswer = (id) => API.delete(`/answers/${id}`);
-export const voteAnswer = (id, voteType) => API.post(`/answers/${id}/vote`, { voteType });
-export const acceptAnswer = (id) => API.post(`/answers/${id}/accept`);
+// Questions API
+export const fetchQuestions = () => api.get('/questions');
+export const fetchQuestion = (id) => api.get(`/questions/${id}`);
+export const postQuestion = (questionData) => api.post('/questions', questionData);
+export const updateQuestion = (id, questionData) => api.put(`/questions/${id}`, questionData);
+export const deleteQuestion = (id) => api.delete(`/questions/${id}`);
 
-// User endpoints
-export const fetchUser = (id) => API.get(`/users/${id}`);
-export const updateUser = (id, data) => API.put(`/users/${id}`, data);
+// Answers API
+export const fetchAnswers = (questionId) => api.get(`/answers/question/${questionId}`);
+export const postAnswer = (questionId, answerData) => api.post(`/answers/${questionId}`, answerData);
+export const updateAnswer = (id, answerData) => api.put(`/answers/${id}`, answerData);
+export const deleteAnswer = (id) => api.delete(`/answers/${id}`);
+export const voteAnswer = (id, voteType) => api.post(`/answers/${id}/vote`, { voteType });
+export const acceptAnswer = (id) => api.post(`/answers/${id}/accept`);
 
-// Tag endpoints
-export const fetchTags = () => API.get('/tags');
-export const fetchQuestionsByTag = (tag) => API.get(`/tags/${tag}/questions`);
+// Notifications API
+export const fetchNotifications = () => api.get('/notifications');
+export const fetchUnreadCount = () => api.get('/notifications/unread-count');
+export const markNotificationRead = (id) => api.patch(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => api.patch('/notifications/mark-all-read');
+export const deleteNotification = (id) => api.delete(`/notifications/${id}`);
+
+// Comments API
+export const fetchComments = (answerId) => api.get(`/comments/answer/${answerId}`);
+export const postComment = (commentData) => api.post('/comments', commentData);
+export const updateComment = (id, commentData) => api.put(`/comments/${id}`, commentData);
+export const deleteComment = (id) => api.delete(`/comments/${id}`);
+export const voteComment = (id, voteType) => api.post(`/comments/${id}/vote`, { voteType });
+
+export default api;
