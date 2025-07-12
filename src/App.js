@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Questions from './pages/Questions';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AskQuestion from './pages/AskQuestion';
@@ -21,6 +22,7 @@ function App() {
           <main className="min-h-screen bg-[#2a1a0f]">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/questions" element={<Questions />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/ask" element={<AskQuestion />} />

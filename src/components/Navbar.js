@@ -73,7 +73,7 @@ const Navbar = () => {
           <Link to="/" className="text-white text-sm font-medium leading-normal hover:text-[#cba990] no-underline">
             Home
           </Link>
-          <Link to="/" className="text-white text-sm font-medium leading-normal hover:text-[#cba990] no-underline">
+          <Link to="/questions" className="text-white text-sm font-medium leading-normal hover:text-[#cba990] no-underline">
             Questions
           </Link>
           <Link to="/tags" className="text-white text-sm font-medium leading-normal hover:text-[#cba990] no-underline">
