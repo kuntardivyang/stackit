@@ -15,8 +15,13 @@ const Home = () => {
   useEffect(() => {
     loadQuestions();
     const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
+    if (userData && userData !== 'undefined') {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+      }
     }
   }, []);
 
@@ -40,7 +45,7 @@ const Home = () => {
     }
 
     const question = questions.find(q => q._id === questionId);
-    if (!question || question.user._id !== user._id) {
+    if (!question || !question.user || question.user._id !== user._id) {
       toast.error('Only the question owner can delete it');
       return;
     }
@@ -185,7 +190,7 @@ const Home = () => {
                   </Link>
                   
                   {/* Question Actions */}
-                  {user && question.user._id === user._id && (
+                  {user && question.user && question.user._id === user._id && (
                     <div className="flex space-x-2 ml-4">
                       <Link
                         to={`/edit-question/${question._id}`}

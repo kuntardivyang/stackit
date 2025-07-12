@@ -20,8 +20,13 @@ const QuestionDetail = () => {
   useEffect(() => {
     loadQuestion();
     const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
+    if (userData && userData !== 'undefined') {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+      }
     }
   }, [id]);
 

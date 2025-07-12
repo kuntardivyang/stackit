@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    emailOrUsername: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
+    if (!formData.emailOrUsername || !formData.password) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -32,7 +32,9 @@ const Login = () => {
       
       // Store token and user data
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
       
       toast.success('Logged in successfully!');
       navigate('/');
@@ -64,19 +66,19 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+              <label htmlFor="emailOrUsername" className="sr-only">
+                Email or Username
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="emailOrUsername"
+                name="emailOrUsername"
+                type="text"
+                autoComplete="username"
                 required
-                value={formData.email}
+                value={formData.emailOrUsername}
                 onChange={handleChange}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-[#493222] placeholder-[#cba990] text-white bg-[#493222] rounded-t-md focus:outline-none focus:ring-[#cba990] focus:border-[#cba990] focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                placeholder="Email or Username"
               />
             </div>
             <div>

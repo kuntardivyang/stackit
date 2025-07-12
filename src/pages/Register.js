@@ -48,7 +48,9 @@ const Register = () => {
       
       // Store token and user data
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
       
       toast.success('Account created successfully!');
       navigate('/');
