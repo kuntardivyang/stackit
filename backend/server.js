@@ -12,8 +12,8 @@ mongoose.connect("mongodb://localhost:27017/stackit", {
   useUnifiedTopology: true,
 });
 
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/questions", require("./routes/questions"));
-app.use("/api/answers", require("./routes/answers"));
+app.use("/api/auth", require("./server/routes/auth"));
+app.use("/api/questions", require("./server/routes/questions"));
+app.use("/api/answers", require("./server/routes/answers"));
 
 app.listen(5000, () => console.log("Server running on port 5000"));
